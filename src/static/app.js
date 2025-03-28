@@ -60,6 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
           const activityName = button.getAttribute("data-activity");
           const email = button.getAttribute("data-email");
 
+          const confirmation = confirm(`Are you sure you want to remove ${email} from ${activityName}?`);
+          if (!confirmation) return;
+
           try {
             const response = await fetch(
               `/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(email)}`,
@@ -69,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             if (response.ok) {
-              alert(`${email} has been removed from ${activityName}`);
               fetchActivities(); // Refresh the activities list
             } else {
               const result = await response.json();
