@@ -138,15 +138,30 @@ button:hover {
 
 .participants-list {
   margin-top: 10px;
-  padding-left: 20px;
-  list-style-type: disc;
-  color: #333;
+  padding-left: 0;
+  list-style-type: none;
 }
 
 .participants-list li {
   margin-bottom: 5px;
   font-size: 14px;
   color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.delete-btn {
+  background-color: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.delete-btn:hover {
+  color: #ff5252;
 }
 
 footer {

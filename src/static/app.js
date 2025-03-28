@@ -13,6 +13,17 @@ document.addEventListener("DOMContentLoaded", () => {
       // Clear loading message
       activitiesList.innerHTML = "";
 
+      // Clear existing options in the dropdown
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
+      // Populate the dropdown with activity options
+      Object.keys(activities).forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        activitySelect.appendChild(option);
+      });
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -27,21 +38,56 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
           <p><strong>Participants:</strong></p>
           <ul class="participants-list">
-            ${details.participants.map(participant => `<li>${participant}</li>`).join("")}
+            ${details.participants
+              .map(
+                (participant) => `
+                  <li>
+                    ${participant}
+                    <button class="delete-btn" data-activity="${name}" data-email="${participant}">❌</button>
+                  </li>
+                `
+              )
+              .join("")}
           </ul>
         `;
 
         activitiesList.appendChild(activityCard);
+      });
 
-        // Add option to select dropdown
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        activitySelect.appendChild(option);
+      // Add event listeners to delete buttons
+      document.querySelectorAll(".delete-btn").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          const activityName = button.getAttribute("data-activity");
+          const email = button.getAttribute("data-email");
+          unregisterParticipant(activityName, email);
+        });
       });
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
+    }
+  }
+
+  // Function to unregister a participant
+  async function unregisterParticipant(activityName, email) {
+    try {
+      const response = await fetch(
+        `/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(email)}`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (response.ok) {
+        alert(`${email} has been removed from ${activityName}`);
+        fetchActivities(); // Refresh the activities list
+      } else {
+        const result = await response.json();
+        alert(result.detail || "An error occurred while unregistering.");
+      }
+    } catch (error) {
+      console.error("Error unregistering participant:", error);
+      alert("Failed to unregister. Please try again.");
     }
   }
 
@@ -66,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh the activities list after successful signup
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
