@@ -56,10 +56,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Add event listeners to delete buttons
       document.querySelectorAll(".delete-btn").forEach((button) => {
-        button.addEventListener("click", (event) => {
+        button.addEventListener("click", async (event) => {
           const activityName = button.getAttribute("data-activity");
           const email = button.getAttribute("data-email");
-          unregisterParticipant(activityName, email);
+
+          try {
+            const response = await fetch(
+              `/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(email)}`,
+              {
+                method: "POST",
+              }
+            );
+
+            if (response.ok) {
+              alert(`${email} has been removed from ${activityName}`);
+              fetchActivities(); // Refresh the activities list
+            } else {
+              const result = await response.json();
+              alert(result.detail || "An error occurred while unregistering.");
+            }
+          } catch (error) {
+            console.error("Error unregistering participant:", error);
+            alert("Failed to unregister. Please try again.");
+          }
         });
       });
     } catch (error) {
